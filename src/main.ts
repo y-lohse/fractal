@@ -79,6 +79,28 @@ requestAnimationFrame(function loop(ts) {
 const hammer = new Hammer(canvas);
 
 hammer.get("pan").set({ direction: Hammer.DIRECTION_ALL });
+hammer.get("pinch").set({ enable: true });
+
+let initialPinchDistance = 0;
+let initialZoom = 0;
+let pinchCenter = { x: 0, y: 0 };
+
+hammer.on("pinchstart", function (ev) {
+  initialPinchDistance = ev.distance;
+  initialZoom = z;
+  pinchCenter = {
+    x: x + (ev.center.x - canvas.width / 2) / (z * 365),
+    y: y + (ev.center.y - canvas.height / 2) / (z * 365),
+  };
+});
+
+hammer.on("pinch", function (ev) {
+  const scaleFactor = ev.distance / initialPinchDistance;
+  zTarget = initialZoom / scaleFactor;
+
+  xTarget = pinchCenter.x - (ev.center.x - canvas.width / 2) / (zTarget * 365);
+  yTarget = pinchCenter.y - (ev.center.y - canvas.height / 2) / (zTarget * 365);
+});
 
 let startPosition = { x: 0, y: 0 };
 hammer.on("panstart", function () {

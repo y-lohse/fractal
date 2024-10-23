@@ -82,7 +82,6 @@ export function generatePalette(t: number) {
   const doubled = normalized * 2;
   const final = doubled > 1 ? 2 - doubled : doubled;
   const eased = easing(final);
-  console.log(eased);
 
   const dominant = Array.from({ length: 3 }, (_, i) => {
     return interpolate(dominantGradients[i][0], dominantGradients[i][1], eased);

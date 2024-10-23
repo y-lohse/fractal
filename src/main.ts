@@ -3,6 +3,7 @@ import { generatePalette } from "./colors";
 import { createMandelbrotProgram } from "./shaders";
 import "./style.css";
 // import TouchEmulator from "hammer-touchemulator";
+import { clamp } from "lodash";
 
 // TouchEmulator();
 
@@ -87,35 +88,46 @@ hammer.get("pan").set({ direction: Hammer.DIRECTION_ALL });
 hammer.get("pinch").set({ enable: true });
 
 let initialZoom = 0;
-let pinchCenter = { x: 0, y: 0 };
+let pinchDiff = { x: 0, y: 0 };
 let startPosition = { x: 0, y: 0 };
 
 hammer.on("pinchstart", function (ev) {
   initialZoom = z;
   startPosition = { x: x, y: y };
-  pinchCenter = {
+  pinchDiff = {
     x: ev.center.x - canvas.width / 2,
     y: ev.center.y - canvas.height / 2,
   };
-  console.log(pinchCenter);
 });
 
 hammer.on("pinch", function (ev) {
-  z = initialZoom * ev.scale;
+  z = clamp(initialZoom * ev.scale, 1, MAX_ZOOM);
   zTarget = z;
 
   const scale = Math.abs(1 - ev.scale);
-  x = startPosition.x + (pinchCenter.x / (z * 365)) * scale;
-  y = startPosition.y + (pinchCenter.y / (z * 365)) * scale;
+  x = startPosition.x + (pinchDiff.x / (z * 365)) * scale;
+  y = startPosition.y + (pinchDiff.y / (z * 365)) * scale;
   xTarget = x;
   yTarget = y;
 });
 
-hammer.on("panstart", function () {
+let pinchEndTime = 0;
+let ignoreThisPan = false;
+hammer.on("pinchend", function (ev) {
+  pinchEndTime = ev.timeStamp;
+});
+
+hammer.on("panstart", function (ev) {
+  if (ev.timeStamp - pinchEndTime < 200) {
+    ignoreThisPan = true;
+    return;
+  }
+  ignoreThisPan = false;
   startPosition = { x: x, y: y };
 });
 
 hammer.on("pan", function (ev) {
+  if (ignoreThisPan) return;
   const { distance, angle } = ev;
   const radians = (angle * Math.PI) / 180;
   const scaleFactor = z * 365;
@@ -125,6 +137,7 @@ hammer.on("pan", function (ev) {
 });
 
 hammer.on("panend", function (ev) {
+  if (ignoreThisPan) return;
   const { velocityX, velocityY } = ev;
   xTarget -= (velocityX * 0.3) / z;
   yTarget -= (velocityY * 0.3) / z;

@@ -2,10 +2,7 @@ import Hammer from "hammerjs";
 import { generatePalette } from "./colors";
 import { createMandelbrotProgram } from "./shaders";
 import "./style.css";
-// import TouchEmulator from "hammer-touchemulator";
 import { clamp } from "lodash";
-
-// TouchEmulator();
 
 const createCanvas = (width: number, height: number) => {
   const canvas = document.createElement("canvas");
@@ -29,6 +26,7 @@ statsElem.style.color = "white";
 statsElem.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 statsElem.style.padding = "0.5rem";
 statsElem.style.fontFamily = "monospace";
+statsElem.style.display = 'none';
 statsElem.addEventListener("click", () => {
   navigator.clipboard.writeText(`${x} ${y} ${z}`);
 });
@@ -76,8 +74,8 @@ requestAnimationFrame(function loop(ts) {
     0
   )}z fps:${fps.toFixed(2)}`;
 
-  // requestAnimationFrame(loop);
-  setTimeout(() => requestAnimationFrame(loop), Math.min(elapsed, 1000 / 60));
+  requestAnimationFrame(loop);
+  // setTimeout(() => requestAnimationFrame(loop), Math.min(elapsed, 1000 / 60));
 });
 
 const hammer = new Hammer(canvas, {

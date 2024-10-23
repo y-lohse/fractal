@@ -77,7 +77,7 @@ const easing = BezierEasing(0.27, 0.14, 0.13, 1.05);
 const interpolate = (a: number, b: number, t: number) => a + (b - a) * t;
 
 export function generatePalette(t: number) {
-  const tSecond = Math.floor(t / 20);
+  const tSecond = Math.floor(t / 40);
   const normalized = (tSecond % 1000) / 1000;
   const doubled = normalized * 2;
   const final = doubled > 1 ? 2 - doubled : doubled;

@@ -2,6 +2,9 @@ import Hammer from "hammerjs";
 import { generatePalette } from "./colors";
 import { createMandelbrotProgram } from "./shaders";
 import "./style.css";
+// import TouchEmulator from "hammer-touchemulator";
+
+// TouchEmulator();
 
 const createCanvas = (width: number, height: number) => {
   const canvas = document.createElement("canvas");
@@ -76,33 +79,38 @@ requestAnimationFrame(function loop(ts) {
   setTimeout(() => requestAnimationFrame(loop), Math.min(elapsed, 1000 / 60));
 });
 
-const hammer = new Hammer(canvas);
+const hammer = new Hammer(canvas, {
+  inputClass: Hammer.TouchInput,
+});
 
 hammer.get("pan").set({ direction: Hammer.DIRECTION_ALL });
 hammer.get("pinch").set({ enable: true });
 
-let initialPinchDistance = 0;
 let initialZoom = 0;
 let pinchCenter = { x: 0, y: 0 };
+let startPosition = { x: 0, y: 0 };
 
 hammer.on("pinchstart", function (ev) {
-  initialPinchDistance = ev.distance;
   initialZoom = z;
+  startPosition = { x: x, y: y };
   pinchCenter = {
-    x: x + (ev.center.x - canvas.width / 2) / (z * 365),
-    y: y + (ev.center.y - canvas.height / 2) / (z * 365),
+    x: ev.center.x - canvas.width / 2,
+    y: ev.center.y - canvas.height / 2,
   };
+  console.log(pinchCenter);
 });
 
 hammer.on("pinch", function (ev) {
-  const scaleFactor = ev.distance / initialPinchDistance;
-  zTarget = initialZoom / scaleFactor;
+  z = initialZoom * ev.scale;
+  zTarget = z;
 
-  xTarget = pinchCenter.x - (ev.center.x - canvas.width / 2) / (zTarget * 365);
-  yTarget = pinchCenter.y - (ev.center.y - canvas.height / 2) / (zTarget * 365);
+  const scale = Math.abs(1 - ev.scale);
+  x = startPosition.x + (pinchCenter.x / (z * 365)) * scale;
+  y = startPosition.y + (pinchCenter.y / (z * 365)) * scale;
+  xTarget = x;
+  yTarget = y;
 });
 
-let startPosition = { x: 0, y: 0 };
 hammer.on("panstart", function () {
   startPosition = { x: x, y: y };
 });
@@ -121,13 +129,6 @@ hammer.on("panend", function (ev) {
   xTarget -= (velocityX * 0.3) / z;
   yTarget -= (velocityY * 0.3) / z;
 });
-
-// hammer.on("press", function() {
-//   zTarget = z * 2;
-// });
-// hammer.on("tap", function() {
-//   zTarget = z / 2;
-// });
 
 window.addEventListener("keydown", (event) => {
   const zoomStep = 0.5 * z;

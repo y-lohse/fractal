@@ -1,7 +1,8 @@
 import Alea from "alea";
 import BezierEasing from "bezier-easing";
 
-const prng = Alea(new Date().getTime());
+// const prng = Alea(new Date().getTime());
+const prng = Alea(33434);
 
 type tuple = [number, number];
 

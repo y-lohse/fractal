@@ -84,18 +84,22 @@ export function generatePalette(t: number) {
   const final = doubled > 1 ? 2 - doubled : doubled;
   const eased = easing(final);
 
-  const dominant = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(dominantGradients[i][0], dominantGradients[i][1], eased);
-  });
-  const darken = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(darkenGradients[i][0], darkenGradients[i][1], eased);
-  });
-  const pulse = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(pulseGradients[i][0], pulseGradients[i][1], eased);
-  });
-  const bleed = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(bleedGradients[i][0], bleedGradients[i][1], eased);
-  });
+  // const dominant = Array.from({ length: 3 }, (_, i) => {
+  //   return interpolate(dominantGradients[i][0], dominantGradients[i][1], eased);
+  // });
+  // const darken = Array.from({ length: 3 }, (_, i) => {
+  //   return interpolate(darkenGradients[i][0], darkenGradients[i][1], eased);
+  // });
+  // const pulse = Array.from({ length: 3 }, (_, i) => {
+  //   return interpolate(pulseGradients[i][0], pulseGradients[i][1], eased);
+  // });
+  // const bleed = Array.from({ length: 3 }, (_, i) => {
+  //   return interpolate(bleedGradients[i][0], bleedGradients[i][1], eased);
+  // });
+  const dominant = [0.7, 0.7, 0.7];
+  const darken = [0.7, 0.7, 0.7];
+  const pulse = [0.2, 0.2, 0.2];
+  const bleed = [0.1, 0.1, 0.1];
 
   const palette = Array.from({ length: 256 }, (_, i) =>
     makeColor(i / 256, dominant, darken, bleed, pulse)

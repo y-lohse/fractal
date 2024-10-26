@@ -14,9 +14,10 @@ const createCanvas = (width: number, height: number) => {
 };
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
-const canvas = createCanvas(window.innerWidth, window.innerHeight);
+const canvas = createCanvas(window.innerWidth, window.innerHeight / 2);
 app.appendChild(canvas);
-const glCanvas = createCanvas(window.innerWidth, window.innerHeight);
+const glCanvas = createCanvas(window.innerWidth, window.innerHeight / 2);
+app.appendChild(glCanvas);
 
 const statsElem = document.createElement("div");
 statsElem.style.position = "absolute";
@@ -28,23 +29,19 @@ statsElem.style.padding = "0.5rem";
 statsElem.style.fontFamily = "monospace";
 // statsElem.style.display = 'none';
 statsElem.addEventListener("click", () => {
-  navigator.clipboard.writeText(`${x} ${y} ${z}`);
+  navigator.clipboard.writeText(
+    `${currentPosition.x} ${currentPosition.y} ${currentPosition.z}`
+  );
 });
 app.appendChild(statsElem);
 
 const currentPosition = new Point(
-  -0.08778076492449352,
-  -0.8724673555119864,
-  980.205095807421
+  -0.7495314867571613,
+  -0.031945481711147236,
+  945140
 );
 
-const targetPosition = new Point(
-  currentPosition.x,
-  currentPosition.y,
-  currentPosition.z
-);
-
-Interactions.init(canvas, currentPosition, targetPosition);
+Interactions.init(canvas, currentPosition);
 
 let palette = generatePalette(Math.floor(new Date().getTime() / 1000));
 
@@ -56,18 +53,15 @@ if (!gl) throw new Error("WebGL not supported");
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("2D context not supported");
 
-const { resolutionLocation, centerLocation, zoomLocation } =
-  createMandelbrotProgram(gl);
+const {
+  resolutionLocation,
+  centerLocation,
+  zoomLocation,
+  centerHighLocation,
+  centerLowLocation,
+} = createMandelbrotProgram(gl);
 
 requestAnimationFrame(function loop(ts) {
-  // TODO use greensock to animate this
-  currentPosition.x =
-    currentPosition.x + (targetPosition.x - currentPosition.x) * 0.1;
-  currentPosition.y =
-    currentPosition.y + (targetPosition.y - currentPosition.y) * 0.1;
-  currentPosition.z =
-    currentPosition.z + (targetPosition.z - currentPosition.z) * 0.1;
-
   palette = generatePalette(Math.floor(new Date().getTime()));
   render(gl, ctx);
 
@@ -87,10 +81,22 @@ requestAnimationFrame(function loop(ts) {
 
 const bg = [0, 0, 0];
 function render(gl: WebGLRenderingContext, ctx: CanvasRenderingContext2D) {
+  const precisionFactor = 1e7; // Adjust as needed for precision
+  const u_center_high = {
+    x: Math.floor(currentPosition.x * precisionFactor) / precisionFactor,
+    y: Math.floor(currentPosition.y * precisionFactor) / precisionFactor,
+  };
+  const u_center_low = {
+    x: currentPosition.x - u_center_high.x,
+    y: currentPosition.y - u_center_high.y,
+  };
+
   const pixelsCount = gl.canvas.width * gl.canvas.height;
   const pixels = new Uint8Array(pixelsCount * 4);
   gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
   gl.uniform2f(centerLocation, currentPosition.x, currentPosition.y);
+  gl.uniform2f(centerHighLocation, u_center_high.x, u_center_high.y);
+  gl.uniform2f(centerLowLocation, u_center_low.x, u_center_low.y);
   gl.uniform1f(zoomLocation, currentPosition.z);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
   gl.readPixels(

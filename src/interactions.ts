@@ -9,7 +9,7 @@ export class Interactions {
   gestureStartPosition: Point;
   currentPosition: Point;
 
-  MAX_ZOOM = 945140;
+  MAX_ZOOM = 135140;
   pinchDiff: { x: number; y: number };
   pinchEndTime: number;
   ignoreThisPan: boolean;

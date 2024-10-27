@@ -26,7 +26,7 @@ statsElem.style.color = "white";
 statsElem.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
 statsElem.style.padding = "0.5rem";
 statsElem.style.fontFamily = "monospace";
-// statsElem.style.display = 'none';
+statsElem.style.display = 'none';
 statsElem.addEventListener("click", () => {
   navigator.clipboard.writeText(
     `${currentPosition.x} ${currentPosition.y} ${currentPosition.z}`

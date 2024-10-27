@@ -25,7 +25,8 @@ const dominantRange: tuple = [0.2, 0.9];
 // const bleedRange: tuple = [0.2, 0.9];
 
 const t = new Date().getTime();
-const prngs = [Alea(t), Alea(t + 1), Alea(t + 2)];
+// const prngs = [Alea(t), Alea(t + 1), Alea(t + 2)];
+const prngs = [Alea(34545), Alea(3404), Alea(45634547)];
 const noise3d = [
   createNoise3D(prngs[0]),
   createNoise3D(prngs[1]),

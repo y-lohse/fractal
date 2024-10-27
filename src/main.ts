@@ -91,7 +91,7 @@ function render(gl: WebGLRenderingContext, ctx: CanvasRenderingContext2D) {
 
   const imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
 
-  const palette = generatePalette(Math.floor(new Date().getTime()));
+  const palette = generatePalette(currentPosition.x, currentPosition.y, currentPosition.z);
 
   for (let i = 0; i < pixelsCount; i++) {
     const iter = pixels[i * 4];

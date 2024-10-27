@@ -106,7 +106,7 @@ export class Interactions {
   }
 
   onKeydown(ev: KeyboardEvent) {
-    const zoomStep = 0.5 * this.currentPosition.z;
+    const zoomStep = 0.6 * this.currentPosition.z;
     switch (ev.key) {
       case "Enter":
         gsap.to(this.currentPosition, {

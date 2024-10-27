@@ -58,7 +58,7 @@ void main() {
   int iter = 0;
 
   for (int i = 0; i < MAX_ITER; i++) {
-    if (length(z) > 2.0) break;
+    if (length(z) > 2.5) break;
     z = vec2(z.x * z.x - z.y * z.y + c.x, 2.0 * z.x * z.y + c.y);
 
     iter++;

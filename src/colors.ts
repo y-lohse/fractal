@@ -1,14 +1,7 @@
 import Alea from "alea";
-import BezierEasing from "bezier-easing";
-
-// const prng = Alea(new Date().getTime());
-const prng = Alea(33434);
+import { createNoise3D } from "simplex-noise";
 
 type tuple = [number, number];
-
-function randomBetween([min, max]: tuple = [0, 0]) {
-  return min + prng() * (max - min);
-}
 
 function makeColor(
   t: number,
@@ -25,80 +18,55 @@ function makeColor(
   ];
 }
 
-const dominantRange: tuple = [0.1, 0.9];
-const dominantGradients = [
-  [randomBetween(dominantRange), randomBetween(dominantRange)],
-  [randomBetween(dominantRange), randomBetween(dominantRange)],
-  [randomBetween(dominantRange), randomBetween(dominantRange)],
-];
-
-const darkenRange: tuple = [0.7, 0.9];
-const darkenGradients = [
-  [randomBetween(darkenRange), randomBetween(darkenRange)],
-  [randomBetween(darkenRange), randomBetween(darkenRange)],
-  [randomBetween(darkenRange), randomBetween(darkenRange)],
-];
-
-const pulseRange: tuple = [0.2, 0.9];
-const pulseBase = [randomBetween(pulseRange), randomBetween(pulseRange)];
-const maxPulseSpead = 0.1;
-const pulseRand = prng();
-const pulseMutationProbablity = 0.4;
-const pulseVariation =
-  pulseRand > pulseMutationProbablity
-    ? maxPulseSpead *
-      ((pulseRand - pulseMutationProbablity) / (1 - pulseMutationProbablity))
-    : 0;
-const pulseGradients = [
-  pulseBase,
-  [pulseBase[0] - pulseVariation, pulseBase[1] + pulseVariation],
-  [pulseBase[0] - pulseVariation, pulseBase[1] + pulseVariation],
-];
-
+const dominantRange: tuple = [0.2, 0.9];
+// const darkenRange: tuple = [0.7, 0.9];
+// const pulseRange: tuple = [0.2, 0.9];
 // low = crisp, high = bleed
-const bleedRange: tuple = [0.2, 0.9];
-const bleedBase = [randomBetween(bleedRange), randomBetween(bleedRange)];
-const maxBleedSpead = 0.2;
-const bleedRand = prng();
-const bleedMutationProbablity = 0.4;
-const bleedVariation =
-  bleedRand > bleedMutationProbablity
-    ? maxBleedSpead *
-      ((bleedRand - bleedMutationProbablity) / (1 - bleedMutationProbablity))
-    : 0;
-const bleedGradients = [
-  bleedBase,
-  [bleedBase[0] - bleedVariation, bleedBase[1] + bleedVariation],
-  [bleedBase[0] - bleedVariation, bleedBase[1] + bleedVariation],
+// const bleedRange: tuple = [0.2, 0.9];
+
+const t = new Date().getTime();
+const prngs = [Alea(t), Alea(t + 1), Alea(t + 2)];
+const noise3d = [
+  createNoise3D(prngs[0]),
+  createNoise3D(prngs[1]),
+  createNoise3D(prngs[2]),
 ];
 
-// https://gre.github.io/bezier-easing-editor/example/
-const easing = BezierEasing(0.27, 0.14, 0.13, 1.05);
+const noiseBetween = (noise: number, min: number, max: number) => {
+  return min + Math.abs(noise) * (max - min);
+};
 
-const interpolate = (a: number, b: number, t: number) => a + (b - a) * t;
+export function generatePalette(x: number, y: number, z: number) {
+  const max = 135140;
+  const modZ = Math.log(z) / Math.log(max) + 0.2;
+  const modX = x * modZ;
+  const modY = y * modZ;
 
-export function generatePalette(t: number) {
-  const tSecond = Math.floor(t / 40);
-  const normalized = (tSecond % 1000) / 1000;
-  const doubled = normalized * 2;
-  const final = doubled > 1 ? 2 - doubled : doubled;
-  const eased = easing(final);
+  const dominant = [
+    noiseBetween(
+      noise3d[0](modX, modY, modZ),
+      dominantRange[0],
+      dominantRange[1]
+    ),
+    noiseBetween(
+      noise3d[1](modX, modY, modZ),
+      dominantRange[0],
+      dominantRange[1]
+    ),
+    noiseBetween(
+      noise3d[2](modX, modY, modZ),
+      dominantRange[0],
+      dominantRange[1]
+    ),
+  ];
+  const darken = [0.7, 0.7, 0.7];
 
-  const dominant = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(dominantGradients[i][0], dominantGradients[i][1], eased);
-  });
-  const darken = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(darkenGradients[i][0], darkenGradients[i][1], eased);
-  });
-  const pulse = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(pulseGradients[i][0], pulseGradients[i][1], eased);
-  });
-  const bleed = Array.from({ length: 3 }, (_, i) => {
-    return interpolate(bleedGradients[i][0], bleedGradients[i][1], eased);
-  });
+  const pulse = [0.1, 0.1, 0.1];
+  const bleed = [0.4, 0.4, 0.4];
 
   const palette = Array.from({ length: 256 }, (_, i) =>
     makeColor(i / 256, dominant, darken, bleed, pulse)
   );
+
   return palette;
 }
